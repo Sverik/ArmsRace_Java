@@ -1,24 +1,24 @@
 package com.po.armsrace.battle.units;
 
 public class UnitType {
-	String type;
+	public String type;
 	
 	/** initial health */
-	int maxHealth;
+	public int maxHealth;
 	/** damage per second (per unit), total damage is dps*live.units */
-	int dps;
+	public int dps;
 	/** damage per second against armored units */
-	int armoredDPS;
-	int movementSpeed;
-	int reloadTime;
-	int shootingRadius;
+	public int armoredDPS;
+	public int movementSpeed;
+	public int reloadTime;
+	public int range100;
 	/* -1 if no limit */
-	int maxShots;
+	public int maxShots;
 
-	boolean splashDamage;
-	boolean armored;
-	boolean shootWhileMoving;
-	boolean targetsArmored;
+	public boolean splashDamage;
+	public boolean armored;
+	public boolean shootWhileMoving;
+	public boolean targetsArmored;
 
 
 }

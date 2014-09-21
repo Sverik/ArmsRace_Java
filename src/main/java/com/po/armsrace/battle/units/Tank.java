@@ -10,7 +10,7 @@ public class Tank extends UnitType {
 
 		movementSpeed  = 2;
 		reloadTime     = 0;
-		shootingRadius = 7;
+		range100 = 700;
 
 		armored          = true;
 		splashDamage     = false;

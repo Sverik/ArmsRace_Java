@@ -4,9 +4,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.po.armsrace.battle.events.Event;
-import com.po.armsrace.battle.events.MoveEvent;
+import com.po.armsrace.battle.events.ShootEvent;
 import com.po.armsrace.battle.events.UnitDiedEvent;
-import com.po.armsrace.battle.events.WinEvent;
 import com.po.armsrace.battle.units.Unit;
 
 public class Map {
@@ -41,8 +40,8 @@ public class Map {
 	 */
 	public Integer doBattle() {
 		log = new ArrayList<List<Event>>(); 
-		for (int turn = 0; turn < maxTurns; turn++) {
-			log.add( doTurn(turn) );
+		for (turn = 0; turn < maxTurns; turn++) {
+			log.add( doTurn() );
 			Integer winner = getWinner();
 			if (winner != null) {
 				this.winner = winner;
@@ -100,28 +99,74 @@ public class Map {
 	 * main turn logic
 	 * @param turn
 	 */
-	public List<Event> doTurn(int turn) {
+	public List<Event> doTurn() {
 		ArrayList<Event> events = new ArrayList<Event>();
 		
+		// step 1: acquire targets and shoot
+		Update shooting = shoot(units);
+		events.addAll(shooting.events);
+		units = shooting.units;
+		
+		// step 2: move units
+		//Update moving = move(shooting.units);
+		
 		// all units of side 0 move right:
-		int[] target = new int[]{19, 2};
-		for (Unit u : units.get(0)) {
-			int[] newLoc = moveToward(u.loc, target);
-			events.add(new MoveEvent(u.loc, newLoc));
-			u.loc = newLoc;
-		}
-		
-		// all units of side 1 die:
-		for (Unit u : units.get(1)) {
-			u.dead = true;
-			events.add(new UnitDiedEvent(u.loc));
-		}
-		
-		events.add(new WinEvent(0, false));
 		
 		return events;
 	}
+
+	private Update move(ArrayList<ArrayList<Unit>> units) {
+		Update update = new Update();
+		update.units = copyUnits(units);
+		update.events = new ArrayList<Event>();
+		
+		for (int side = 0; side < 2; side++) {
+			
+		}
+		return update;
+	}
+
+	/**
+	 * Acquires targets and shoots. Does not change units but returns new version.
+	 * @return
+	 */
+	private Update shoot(ArrayList<ArrayList<Unit>> units) {
+		Update update = new Update();
+		update.units = copyUnits(units);
+		update.events = new ArrayList<Event>();
+		for (int side = 0; side < 2; side++) {
+			// shooting only opposing side:
+			int oppSide = (side == 0) ? 1 : 0;
+			
+			for (Unit shooter : units.get(0)) {
+				if ( ! shooter.canShoot(turn)) { continue; }
+				Unit target   = shooter.getTarget(update.units.get(oppSide));
+				if (target != null) {
+					target.health = BattleUtils.healthAfterShooting(shooter, target);
+					target.dead   = target.health[0] == 0;
+					shooter.lastShotTime = turn;
+					update.events.add(new ShootEvent(shooter.loc, target.loc, target.health));
+					if (target.dead) {
+						update.events.add(new UnitDiedEvent(target.loc));
+					}
+				}
+			}
+		}
+		return update;
+	}
 	
+	private static ArrayList<ArrayList<Unit>> copyUnits(ArrayList<ArrayList<Unit>> units) {
+		ArrayList<ArrayList<Unit>> copy = new ArrayList<>();
+		for (ArrayList<Unit> side : units) {
+			ArrayList<Unit> newSide = new ArrayList<>();
+			for (Unit u : side) {
+				newSide.add( u.copy() );
+			}
+			copy.add(newSide);
+		}
+		return copy;
+	}
+
 	/**
 	 * @param from
 	 * @param destination

@@ -10,7 +10,7 @@ public class TankDestroyer extends UnitType {
 
 		movementSpeed  = 2;
 		reloadTime     = 1;
-		shootingRadius = 8;
+		range100 = 800;
 
 		armored          = true;
 		splashDamage     = false;

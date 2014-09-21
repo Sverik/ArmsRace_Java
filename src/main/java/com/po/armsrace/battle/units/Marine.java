@@ -10,7 +10,7 @@ public class Marine extends UnitType {
 
 		movementSpeed  = 1;
 		reloadTime     = 0;
-		shootingRadius = 5;
+		range100 = 500;
 		maxShots       = -1;
 
 		armored          = false;
