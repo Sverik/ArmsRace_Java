@@ -18,6 +18,7 @@ public class ArmsRaceApplication extends Application {
 		// Defines only one route
 		router.attachDefault(ArmsResource.class);
 		router.attach("/arms/{armId}", ArmsResource.class);
+		router.attach("/battle/{armId}", BattleResource.class);
 
 		return router;
 	}
