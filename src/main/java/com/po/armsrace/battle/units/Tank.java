@@ -5,8 +5,8 @@ public class Tank extends UnitType {
 		this.type = "tank";
 		
 		this.maxHealth  = 3000;
-		this.dps        = 300;
-		this.armoredDPS = 500;
+		this.dps        = 600;
+		this.armoredDPS = 1000;
 
 		movementSpeed  = 2;
 		reloadTime     = 0;

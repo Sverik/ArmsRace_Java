@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.po.armsrace.battle.events.Event;
+import com.po.armsrace.battle.events.MoveEvent;
 import com.po.armsrace.battle.events.ShootEvent;
 import com.po.armsrace.battle.events.UnitDiedEvent;
 import com.po.armsrace.battle.units.Unit;
@@ -38,18 +39,28 @@ public class Map {
 	 * Main loop
 	 * @return winner: 0 or 1. Or null if a draw
 	 */
-	public Integer doBattle() {
-		log = new ArrayList<List<Event>>(); 
+	public Battle doBattle() {
+		Battle battle = new Battle();
+		battle.initialUnits = units;
+		
+		log = new ArrayList<List<Event>>();
+		this.winner = null;
 		for (turn = 0; turn < maxTurns; turn++) {
 			log.add( doTurn() );
 			Integer winner = getWinner();
 			if (winner != null) {
 				this.winner = winner;
-				return winner;
+				break;
 			}
 		}
-		winner = whoHasMoreHP();
-		return winner;
+		if (winner == null) {
+			winner = whoHasMoreHP();
+		}
+		battle.log    = log;
+		battle.winner = winner;
+		battle.draw   = winner == null;
+
+		return battle;
 	}
 	
 	private Integer whoHasMoreHP() {
@@ -108,9 +119,9 @@ public class Map {
 		units = shooting.units;
 		
 		// step 2: move units
-		//Update moving = move(shooting.units);
-		
-		// all units of side 0 move right:
+		Update moving = move(units);
+		events.addAll(moving.events);
+		units = moving.units;
 		
 		return events;
 	}
@@ -121,7 +132,23 @@ public class Map {
 		update.events = new ArrayList<Event>();
 		
 		for (int side = 0; side < 2; side++) {
-			
+			int oppSide = (side == 0) ? 1 : 0;
+			for (Unit mover : update.units.get(side)) {
+				if ( ! mover.canMove(turn)) continue;
+				int[] newLoc = mover.getNewLocation(units.get(oppSide), turn);
+				if (newLoc == null || BattleUtils.isOccupied(update.units, newLoc)) {
+					continue;
+				}
+				// moving there:
+				update.events.add(new MoveEvent(mover.loc, newLoc));
+				mover.loc = newLoc;
+				if (mover.lastMoveTime == turn) {
+					mover.lastNumMoves += 1;
+				} else {
+					mover.lastMoveTime = turn;
+					mover.lastNumMoves = 1;
+				}
+			}
 		}
 		return update;
 	}
@@ -142,9 +169,13 @@ public class Map {
 				if ( ! shooter.canShoot(turn)) { continue; }
 				Unit target   = shooter.getTarget(update.units.get(oppSide));
 				if (target != null) {
+					// shooting logic
 					target.health = BattleUtils.healthAfterShooting(shooter, target);
 					target.dead   = target.health[0] == 0;
 					shooter.lastShotTime = turn;
+					if (shooter.shotsRemaining > 0) {
+						shooter.shotsRemaining -= 1;
+					}
 					update.events.add(new ShootEvent(shooter.loc, target.loc, target.health));
 					if (target.dead) {
 						update.events.add(new UnitDiedEvent(target.loc));
@@ -165,27 +196,6 @@ public class Map {
 			copy.add(newSide);
 		}
 		return copy;
-	}
-
-	/**
-	 * @param from
-	 * @param destination
-	 * @return new location for moving 1 step to toward destination
-	 */
-	private int[] moveToward(int[] from, int[] toward) {
-		int direction[] = new int[]{toward[0] - from[0], toward[1] - from[1]};
-		
-		int[] to = new int[]{from[0], from[1]};
-		if (direction[0] == 0 && direction[1] == 0) {
-			return to;
-		}
-		if (Math.abs(direction[0]) >= Math.abs(direction[1])) {
-			// moving along 0 axis
-			to[0] += direction[0] > 0 ? 1 : -1;
-		} else  {
-			to[1] += direction[1] > 0 ? 1 : -1;
-		}
-		return to;
 	}
 	
 }

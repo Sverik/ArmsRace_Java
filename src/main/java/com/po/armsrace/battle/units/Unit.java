@@ -109,9 +109,64 @@ public class Unit {
 	}
 
 	public boolean canShoot(int turn) {
+		if (shotsRemaining == 0) return false;
 		if (turn - lastShotTime <= type.reloadTime) return false;
 		if (lastMoveTime == turn && ! type.shootWhileMoving) return false;
 		
 		return true;
+	}
+	
+	public int getNumMovesLeft(int turn) {
+		if (lastMoveTime != turn) return type.movementSpeed;
+		return type.movementSpeed - lastNumMoves;
+	}
+	
+	public boolean canMove(int turn) {
+		if (getNumMovesLeft(turn) == 0) {
+			return false;
+		}
+		if (type.shootWhileMoving) {
+			return true;
+		} else {
+			// only move when unit is not reloading (or shot)
+			return turn - lastShotTime > type.reloadTime;
+		}
+	}
+
+	public int[] getNewLocation(ArrayList<Unit> targets, int turn) {
+		if (lastShotTime == turn) {
+			// just shot this turn, now moving away from target:
+			Unit target = this.getClosestPreferredTarget(targets);
+			if (target == null)
+				return null;
+			if (BattleUtils.dist100(this, target) < this.type.range100) {
+				// moving away
+				return BattleUtils.moveToward(loc, target.loc, -1);
+			}
+			// moving closer
+			return BattleUtils.moveToward(loc, target.loc, 1);
+		}
+		// moving closer to target:
+		Unit target = this.getClosestPreferredTarget(targets);
+		if (target == null)
+			return null;
+		return BattleUtils.moveToward(loc, target.loc, 1);
+	}
+	
+	/**
+	 * @param targets
+	 * @return closest target. Chooses target that is preferred
+	 */
+	public Unit getClosestPreferredTarget(ArrayList<Unit> targets) {
+		Unit target = null;
+		for (Unit u : targets) {
+			if (u.dead) continue;
+			if (target == null) {
+				target = u;
+				continue;
+			}
+			target = preferredTarget(target, u);
+		}
+		return target;
 	}
 }
