@@ -77,7 +77,7 @@ public class Map {
 	private int getTotalHP(int side) {
 		int hp = 0;
 		for (Unit u : units.get(side)) {
-			if (u.dead) continue;
+			if (u.isDead()) continue;
 			hp += u.getTotalHP();
 		}
 		return hp;
@@ -89,9 +89,9 @@ public class Map {
 	 */
 	private boolean isAlive(int side) {
 		for (Unit u : units.get(side)) {
-			if (u.dead) continue;
-			if (u.getTotalHP() > 0)
+			if ( ! u.isDead()) {
 				return true;
+			}
 		}
 		return false;
 	}
@@ -165,19 +165,18 @@ public class Map {
 			// shooting only opposing side:
 			int oppSide = (side == 0) ? 1 : 0;
 			
-			for (Unit shooter : units.get(0)) {
+			for (Unit shooter : units.get(side)) {
 				if ( ! shooter.canShoot(turn)) { continue; }
-				Unit target   = shooter.getTarget(update.units.get(oppSide));
+				Unit target = shooter.getTarget(update.units.get(oppSide));
 				if (target != null) {
 					// shooting logic
 					target.health = BattleUtils.healthAfterShooting(shooter, target);
-					target.dead   = target.health[0] == 0;
 					shooter.lastShotTime = turn;
 					if (shooter.shotsRemaining > 0) {
 						shooter.shotsRemaining -= 1;
 					}
 					update.events.add(new ShootEvent(shooter.loc, target.loc, target.health));
-					if (target.dead) {
+					if (target.isDead()) {
 						update.events.add(new UnitDiedEvent(target.loc));
 					}
 				}

@@ -2,32 +2,35 @@ package com.po.armsrace.battle;
 
 import java.util.ArrayList;
 
+import com.po.armsrace.battle.units.Health;
 import com.po.armsrace.battle.units.Unit;
 
 public class BattleUtils {
-	public static int[] healthAfterShooting(Unit shooter, Unit target) {
-		int[] health = new int[target.getNumAliveUnits()];
-		for (int i = 0; i < health.length; i++) {
-			health[i] = target.health[i];
-		}
+	public static Health healthAfterShooting(Unit shooter, Unit target) {
+		Health health = target.health.copy();
 		int dps = shooter.getTotalDPS(target);
 		
 		if (shooter.type.splashDamage) {
 			// dps is done against each unit
-			for (int i = 0; i < health.length; i++) {
-				health[i] = (health[i] > dps) ? health[i] - dps : 0;
+			health.unitHP -= dps;
+			health.weakestHP -= dps;
+			if (health.unitHP <= 0) {
+				health.setDead();
+			} else if (health.weakestHP <= 0) {
+				health.numUnits -= 1;
+				health.weakestHP = health.unitHP;
 			}
 		} else {
 			// dps is for single unit
-			for (int i = health.length-1; i >= 0; i--) {
-				if (health[i] >= dps) {
-					// dps run out on this unit
-					health[i] -= dps;
-					break;
-				} else {
-					// unit dies 
-					dps -= health[i];
-					health[i] = 0;
+			int hpLeft = target.getTotalHP() - dps;
+			if (hpLeft <= 0) {
+				health.setDead();
+			} else {
+				health.numUnits  = hpLeft / health.unitHP + 1;
+				health.weakestHP = hpLeft % health.unitHP;
+				if (health.weakestHP == 0) {
+					health.numUnits -= 1;
+					health.weakestHP = health.unitHP;
 				}
 			}
 		}
@@ -70,7 +73,9 @@ public class BattleUtils {
 	public static boolean isOccupied(ArrayList<ArrayList<Unit>> units, int[] loc) {
 		for (ArrayList<Unit> side : units) {
 			for (Unit unit : side) {
-				if (!unit.dead && unit.loc[0] == loc[0] && unit.loc[1] == loc[1]) {
+				if ( ! unit.isDead() && 
+						unit.loc[0] == loc[0] && 
+						unit.loc[1] == loc[1]) {
 					return true;
 				}
 			}

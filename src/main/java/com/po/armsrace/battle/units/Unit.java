@@ -7,13 +7,12 @@ import com.po.armsrace.battle.BattleUtils;
 public class Unit {
 	public UnitType type;
 	
-	public int[] health;
+	public Health health;
 	public int[] loc;
 	public int shotsRemaining;
 	public int lastNumMoves;
 	public int lastMoveTime;
 	public int lastShotTime;
-	public boolean dead;
 	public int n;
 	
 	public Unit(UnitType type) {
@@ -22,46 +21,37 @@ public class Unit {
 	
 	public Unit(UnitType type, int n, int[] location) {
 		this.type = type;
-		this.n    = n;
-		this.health = new int[n];
-		for (int i = 0; i < n; i++) {
-			health[i] = type.maxHealth;
-		}
-		this.loc = location;
+		this.n      = n;
+		this.health = new Health(n, type.maxHealth, type.maxHealth);
+		this.loc    = location;
 		this.lastNumMoves = 0;
 		this.lastMoveTime = -1000;
 		this.lastShotTime = -1000;
 		this.shotsRemaining = type.maxShots;
-		this.dead = false;
 	}
 	
 	public Unit copy() {
 		Unit u = new Unit(this.type);
+		u.n      = n;
 		u.health = this.health;
-		u.loc = this.loc;
-		u.shotsRemaining = shotsRemaining;
+		u.loc    = this.loc;
+		u.lastNumMoves = lastNumMoves;
 		u.lastMoveTime = lastMoveTime;
 		u.lastShotTime = lastShotTime;
-		u.dead = dead;
-		u.n    = n;
+		u.shotsRemaining = shotsRemaining;
 		return u;
 	}
 	
 	public int getTotalHP() {
-		int hp = 0;
-		for (int i = 0; i < health.length; i++) {
-			hp += health[i];
-		}
-		return hp;
+		return (health.numUnits - 1) * health.unitHP + health.weakestHP;
 	}
 	
 	public int getNumAliveUnits() {
-		int alive = 0;
-		for (int i = 0; i < health.length; i++) {
-			if (health[i] > 0)
-				alive += 1;
-		}
-		return alive;
+		return health.numUnits;
+	}
+	
+	public boolean isDead() {
+		return health.numUnits <= 0;
 	}
 	
 	public int getTotalDPS(Unit target) {
@@ -77,7 +67,7 @@ public class Unit {
 	public Unit getTarget(ArrayList<Unit> targets) {
 		Unit target = null;
 		for (Unit t : targets) {
-			if (t.dead) continue;
+			if (t.isDead()) continue;
 			int dist100 = BattleUtils.dist100(this, t);
 			if (dist100 > this.type.range100) {
 				continue;
@@ -160,7 +150,7 @@ public class Unit {
 	public Unit getClosestPreferredTarget(ArrayList<Unit> targets) {
 		Unit target = null;
 		for (Unit u : targets) {
-			if (u.dead) continue;
+			if (u.isDead()) continue;
 			if (target == null) {
 				target = u;
 				continue;
