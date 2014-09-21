@@ -114,14 +114,24 @@ public class Map {
 		ArrayList<Event> events = new ArrayList<Event>();
 		
 		// step 1: acquire targets and shoot
-		Update shooting = shoot(units);
-		events.addAll(shooting.events);
-		units = shooting.units;
+		Update shooting1 = shoot(units);
+		events.addAll(shooting1.events);
+		units = shooting1.units;
 		
 		// step 2: move units
-		Update moving = move(units);
-		events.addAll(moving.events);
-		units = moving.units;
+		Update moving1 = move(units);
+		events.addAll(moving1.events);
+		units = moving1.units;
+
+		// step 3: acquire targets and shoot
+		Update shooting2 = shoot(units);
+		events.addAll(shooting2.events);
+		units = shooting2.units;
+
+		// step 4: move units
+		Update moving2 = move(units);
+		events.addAll(moving2.events);
+		units = moving2.units;
 		
 		return events;
 	}
@@ -165,15 +175,18 @@ public class Map {
 			// shooting only opposing side:
 			int oppSide = (side == 0) ? 1 : 0;
 			
-			for (Unit shooter : units.get(side)) {
-				if ( ! shooter.canShoot(turn)) { continue; }
+			for (int i = 0, nr = units.get(side).size(); i < nr; i++) {
+				Unit shooter = units.get(side).get(i);
+				if ( shooter.isDead() ) continue;
+				if ( ! shooter.canShoot(turn)) continue;
 				Unit target = shooter.getTarget(update.units.get(oppSide));
 				if (target != null) {
 					// shooting logic
 					target.health = BattleUtils.healthAfterShooting(shooter, target);
-					shooter.lastShotTime = turn;
-					if (shooter.shotsRemaining > 0) {
-						shooter.shotsRemaining -= 1;
+					Unit updatedShooter = update.units.get(side).get(i);
+					updatedShooter.lastShotTime = turn;
+					if (updatedShooter.shotsRemaining > 0) {
+						updatedShooter.shotsRemaining -= 1;
 					}
 					update.events.add(new ShootEvent(shooter.loc, target.loc, target.health));
 					if (target.isDead()) {

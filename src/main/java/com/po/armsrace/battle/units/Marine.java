@@ -4,14 +4,13 @@ public class Marine extends UnitType {
 	public Marine() {
 		this.type = "marine";
 
-		this.maxHealth  = 300;
+		this.maxHealth  = 400;
 		this.dps        = 60;
-		this.armoredDPS = 20;
+		this.armoredDPS = 30;
 
 		movementSpeed  = 1;
 		reloadTime     = 0;
 		range100 = 500;
-		maxShots       = -1;
 
 		armored          = false;
 		splashDamage     = false;

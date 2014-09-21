@@ -13,12 +13,11 @@ public class UnitType {
 	public int reloadTime;
 	public int range100;
 	/* -1 if no limit */
-	public int maxShots;
+	public int maxShots = -1;
 
-	public boolean splashDamage;
-	public boolean armored;
-	public boolean shootWhileMoving;
-	public boolean targetsArmored;
-
+	public boolean splashDamage     = false;
+	public boolean armored          = false;
+	public boolean shootWhileMoving = false;
+	public boolean targetsArmored   = false;
 
 }
