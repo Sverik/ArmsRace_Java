@@ -8,7 +8,7 @@
 
 	<servlet>
 		<servlet-name>armsrace</servlet-name>
-		<servlet-class>org.restlet.ext.servlet.ServerServlet</servlet-class>
+		<servlet-class>com.po.armsrace.Servlet</servlet-class>
 		<init-param>
 			<param-name>org.restlet.application</param-name>
 			<param-value>com.po.armsrace.ArmsRaceApplication</param-value>
