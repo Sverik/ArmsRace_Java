@@ -1,4 +1,4 @@
-package com.po.armsrace.store;
+package com.po.armsrace.store.entities;
 
 import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Id;

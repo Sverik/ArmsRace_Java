@@ -5,8 +5,9 @@ import org.restlet.data.Status;
 import org.restlet.resource.Post;
 import org.restlet.resource.ServerResource;
 
+import com.po.armsrace.store.OS;
 import com.po.armsrace.store.SecretGenerator;
-import com.po.armsrace.store.User;
+import com.po.armsrace.store.entities.User;
 
 public class RegisterResource extends ServerResource {
 	
@@ -25,6 +26,8 @@ public class RegisterResource extends ServerResource {
 		User u = new User();
 		u.username = username;
 		u.secret = SecretGenerator.nextSessionId();
+		
+		OS.ofy().save().entity(u);
 		
 		CookieSetting cs = new CookieSetting("secret", u.secret);
 		this.getResponse().getCookieSettings().add(cs);
