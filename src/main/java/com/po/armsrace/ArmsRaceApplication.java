@@ -20,6 +20,7 @@ public class ArmsRaceApplication extends Application {
 		router.attach("/arms/{armId}", ArmsResource.class);
 		router.attach("/battle/{battleId}", BattleResource.class);
 		router.attach("/register/{username}", RegisterResource.class);
+		router.attach("/player/", PlayerResource.class);
 
 		return router;
 	}
