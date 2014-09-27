@@ -3,6 +3,13 @@
     <application>leafy-racer-709</application>
     <version>${appengine.app.version}</version>
     <threadsafe>true</threadsafe>
+    <static-files>
+      <include path="/**.png" />
+      <include path="/**.html" />
+      <include path="/**.css" />
+      <include path="/**.js" />
+      <include path="/**.txt" />
+    </static-files>
     
     <system-properties>
         <property name="java.util.logging.config.file" value="WEB-INF/logging.properties"/>
