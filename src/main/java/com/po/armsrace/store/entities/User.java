@@ -1,5 +1,6 @@
 package com.po.armsrace.store.entities;
 
+import com.googlecode.objectify.Ref;
 import com.googlecode.objectify.annotation.Cache;
 import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Id;
@@ -11,7 +12,7 @@ public class User {
 	public String username;
 	public int wins;
 	public int played;
-	//public Ref<Game> activeGame;
+	public Ref<Game> activeGame;
 	
 	/*
 	@JsonIgnore

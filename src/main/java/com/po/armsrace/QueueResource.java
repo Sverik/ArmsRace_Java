@@ -1,11 +1,15 @@
 package com.po.armsrace;
 
-import org.restlet.data.Cookie;
+import org.restlet.data.Status;
 import org.restlet.resource.Post;
 import org.restlet.resource.ServerResource;
 
 import com.googlecode.objectify.Key;
+import com.googlecode.objectify.Ref;
+import com.googlecode.objectify.Work;
 import com.po.armsrace.store.OS;
+import com.po.armsrace.store.entities.Game;
+import com.po.armsrace.store.entities.Queue;
 import com.po.armsrace.store.entities.User;
 
 /*
@@ -20,11 +24,13 @@ public class QueueResource extends ServerResource {
 	public static final long GAME_DURATION_MS = 4*60*1000;
 	
 	@Post("json")
-	public String queue(Object o) {
-		final User user = getUser(this);
-		return null;
-
-		/*
+	public Game queue(Object o) {
+		final User user = PlayerResource.getUser(this);
+		if (user == null) {
+			setStatus(Status.CLIENT_ERROR_UNAUTHORIZED);
+			return null;
+		}
+		
 		if (user.activeGame != null) {
 			return user.activeGame.get();
 		}
@@ -40,6 +46,7 @@ public class QueueResource extends ServerResource {
 					Queue queue = new Queue();
 					queue.updatedTime = System.currentTimeMillis();
 					queue.user = Ref.create(user);
+					queue.id   = Queue.ID;
 					
 					OS.ofy().save().entity(queue);
 					return null;
@@ -78,18 +85,6 @@ public class QueueResource extends ServerResource {
 			}
 		});
 		return game;
-		*/
 	}
 	
-	public User getUser(ServerResource resource) {
-		Cookie secretCookie = resource.getCookies().getFirst("secret");
-		if (secretCookie == null) {
-			return null;
-		}
-		String secret = secretCookie.getValue();
-		// fetching user from GAE datastore
-		User u = OS.ofy().load().key( Key.create(User.class, secret) ).now();
-		return u;
-	}
-
 }
