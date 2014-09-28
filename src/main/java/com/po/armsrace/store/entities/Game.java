@@ -35,11 +35,7 @@ public class Game {
 	public GameJson getJson(User user) {
 		GameJson gj = new GameJson();
 		
-		if (Key.create(user).compareTo(player1.getKey()) == 0) {
-			gj.yourNumber = 1;
-		} else {
-			gj.yourNumber = 2;
-		}
+		gj.yourNumber = whichPlayer(user);
 		
 		gj.id = id;
 		gj.player1 = player1.get().username;
@@ -52,7 +48,7 @@ public class Game {
 		gj.attacker = attacker;
 		
 		gj.peaceOffer1 = peaceOffer1;
-		gj.peaceOffer1 = peaceOffer2;
+		gj.peaceOffer2 = peaceOffer2;
 		
 		gj.state1 = state1;
 		gj.state2 = state2;
@@ -61,4 +57,26 @@ public class Game {
 		gj.finished = finished;
 		return gj;
 	}
+
+	/**
+	 * @param user
+	 * @return 1 if user is player1
+	 *         2 if user is player2
+	 *         -1 if neither
+	 */
+	public int whichPlayer(User user) {
+		if (Key.create(user).compareTo(player1.getKey()) == 0) {
+			return 1;
+		}
+		if (Key.create(user).compareTo(player2.getKey()) == 0) {
+			return 2;
+		}
+		return -1;
+	}
+
+	public boolean isInGame(User user) {
+		int n = whichPlayer(user);
+		return n == 1 || n == 2;
+	}
+	
 }

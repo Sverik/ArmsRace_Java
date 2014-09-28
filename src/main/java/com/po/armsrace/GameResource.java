@@ -3,7 +3,6 @@ package com.po.armsrace;
 import java.io.IOException;
 import java.util.Map;
 
-import org.restlet.data.Cookie;
 import org.restlet.data.Status;
 import org.restlet.representation.InputRepresentation;
 import org.restlet.resource.Post;
@@ -13,12 +12,14 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.googlecode.objectify.Key;
+import com.po.armsrace.json.GameJson;
 import com.po.armsrace.store.OS;
+import com.po.armsrace.store.entities.Game;
 import com.po.armsrace.store.entities.User;
 
 public class GameResource extends ServerResource {
 
-	static class State {
+	public static class State {
 		/*
 		 * Katsetus, kliendilt saadetud Json
 		 * {"money":229,"arms":{"1":2},"econs":{"1":5,"2":1},"peaceOffer":false,"attacked":false}
@@ -37,24 +38,30 @@ public class GameResource extends ServerResource {
 	}
 
 	ObjectMapper om = new ObjectMapper();
-
+	
 	@Post("json")
-	public User game(InputRepresentation input) {
-		Cookie secretCookie = getCookies().getFirst("secret");
-		if (secretCookie == null) {
-			setStatus(Status.CLIENT_ERROR_UNAUTHORIZED);
-			return null;
-		}
-		String secret = secretCookie.getValue();
-		// fetching user from GAE datastore
-		User u = OS.ofy().load().key( Key.create(User.class, secret) ).now();
-
+	public GameJson game(InputRepresentation input) {
+		User u = PlayerResource.getUser(this);
 		if (u == null) {
 			setStatus(Status.CLIENT_ERROR_UNAUTHORIZED);
 			return null;
 		}
+		
+		// checking game exists & user is in game
+		String gameIdStr = getAttribute("gameId");
+		if (gameIdStr == null) {
+			setStatus(Status.CLIENT_ERROR_UNAUTHORIZED);
+			return null;
+		}
+		long gameId = Long.parseLong(gameIdStr);
+		Game game = OS.ofy().load().key( Key.create(Game.class, gameId) ).now();
+		if (game == null || ! game.isInGame(u)) {
+			setStatus(Status.CLIENT_ERROR_UNAUTHORIZED);
+			return null;
+		}
+		
 		setStatus(Status.SUCCESS_OK);
-
+		
 		String text = "";
 		try {
 			text = input.getText();
@@ -64,6 +71,8 @@ public class GameResource extends ServerResource {
 		System.out.println(text);
 		try {
 			State s = om.readValue(text, State.class);
+			// updating game state
+			GameLogic.setState(game, s, game.whichPlayer(u), om);
 			System.out.println(s);
 		} catch (JsonParseException e) {
 			e.printStackTrace();
@@ -72,6 +81,7 @@ public class GameResource extends ServerResource {
 		} catch (IOException e) {
 			e.printStackTrace();
 		}
-		return u;
+		return game.getJson(u);
 	}
+
 }
