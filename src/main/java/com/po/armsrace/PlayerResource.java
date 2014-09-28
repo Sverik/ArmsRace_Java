@@ -19,20 +19,24 @@ public class PlayerResource extends ServerResource {
 	 */
 	@Get("json")
 	public User checkPlayer(Object o) {
-		Cookie secretCookie = getCookies().getFirst("secret");
-		if (secretCookie == null) {
-			setStatus(Status.CLIENT_ERROR_UNAUTHORIZED);
-			return null;
-		}
-		String secret = secretCookie.getValue();
-		// fetching user from GAE datastore
-		User u = OS.ofy().load().key( Key.create(User.class, secret) ).now();
+		User u = getUser(this);
 		
 		if (u == null) {
 			setStatus(Status.CLIENT_ERROR_UNAUTHORIZED);
 			return null;
 		}
 		setStatus(Status.SUCCESS_OK);
+		return u;
+	}
+	
+	public static User getUser(ServerResource resource) {
+		Cookie secretCookie = resource.getCookies().getFirst("secret");
+		if (secretCookie == null) {
+			return null;
+		}
+		String secret = secretCookie.getValue();
+		// fetching user from GAE datastore
+		User u = OS.ofy().load().key( Key.create(User.class, secret) ).now();
 		return u;
 	}
 }
