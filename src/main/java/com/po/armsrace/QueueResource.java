@@ -7,16 +7,12 @@ import org.restlet.resource.ServerResource;
 import com.googlecode.objectify.Key;
 import com.googlecode.objectify.Ref;
 import com.googlecode.objectify.Work;
+import com.po.armsrace.json.GameJson;
 import com.po.armsrace.store.OS;
 import com.po.armsrace.store.entities.Game;
 import com.po.armsrace.store.entities.Queue;
 import com.po.armsrace.store.entities.User;
 
-/*
-class QueueResult {
-	Long gameId;
-	boolean inqueue;
-}*/
 
 public class QueueResource extends ServerResource {
 	public static final long VALID_QUEUE_MS = 10000;
@@ -24,7 +20,7 @@ public class QueueResource extends ServerResource {
 	public static final long GAME_DURATION_MS = 4*60*1000;
 	
 	@Post("json")
-	public Game queue(Object o) {
+	public GameJson queue(Object o) {
 		final User user = PlayerResource.getUser(this);
 		if (user == null) {
 			setStatus(Status.CLIENT_ERROR_UNAUTHORIZED);
@@ -32,13 +28,13 @@ public class QueueResource extends ServerResource {
 		}
 		
 		if (user.activeGame != null) {
-			return user.activeGame.get();
+			return user.activeGame.get().getJson(user);
 		}
 		
 		// fetch queue or create new
-		Game game = OS.ofy().transact(new Work<Game>() {
+		GameJson gj = OS.ofy().transact(new Work<GameJson>() {
 			@Override
-			public Game run() {
+			public GameJson run() {
 				Queue q = OS.ofy().load().key( Key.create(Queue.class, Queue.ID) ).now();
 				
 				if (q == null) {
@@ -61,7 +57,7 @@ public class QueueResource extends ServerResource {
 					if (System.currentTimeMillis() - q.updatedTime < VALID_QUEUE_MS) {
 						// too old queue, replacing
 						q.updatedTime = System.currentTimeMillis();
-						q.user = Ref.create( Key.create(user) );
+						q.user = Ref.create(user);
 						OS.ofy().save().entity(q);
 						return null;
 					} else {
@@ -70,21 +66,22 @@ public class QueueResource extends ServerResource {
 						game.startTime = System.currentTimeMillis() + START_DELAY_MS;
 						game.endTime   = game.startTime + GAME_DURATION_MS;
 						game.player1   = q.user;
-						game.player2   = Ref.create(Key.create(user));
+						game.player2   = Ref.create(user);
 						
 						OS.ofy().save().entity(game).now();
-						// adding game to users'
+						
+						// adding game to users
 						User p1 = q.user.get();
 						p1.activeGame = Ref.create(game);
 						user.activeGame = p1.activeGame;
 						OS.ofy().save().entities(user, p1);
 
-						return game;
+						return game.getJson(user);
 					}
 				}
 			}
 		});
-		return game;
+		return gj;
 	}
 	
 }
