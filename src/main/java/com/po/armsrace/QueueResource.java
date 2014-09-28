@@ -75,6 +75,9 @@ public class QueueResource extends ServerResource {
 						p1.activeGame = Ref.create(game);
 						user.activeGame = p1.activeGame;
 						OS.ofy().save().entities(user, p1);
+						
+						// removing queue
+						OS.ofy().delete().entity(q);
 
 						return game.getJson(user);
 					}
