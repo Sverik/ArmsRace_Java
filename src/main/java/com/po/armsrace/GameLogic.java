@@ -1,9 +1,19 @@
 package com.po.armsrace;
 
+import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 
+import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.po.armsrace.battle.units.ChemicalTroops;
+import com.po.armsrace.battle.units.Marine;
+import com.po.armsrace.battle.units.Sniper;
+import com.po.armsrace.battle.units.Tank;
+import com.po.armsrace.battle.units.TankDestroyer;
+import com.po.armsrace.battle.units.UnitType;
 import com.po.armsrace.store.entities.Game;
 
 public class GameLogic {
@@ -15,6 +25,27 @@ public class GameLogic {
 		public int money;
 		public Map<String, Integer> arms;
 		public Map<String, Integer> econs;
+	}
+	
+	public static final HashMap<String, UnitType> units;
+	static {
+		units = new HashMap<String, UnitType>();
+		units.put("1", new Marine());
+		units.put("2", new Sniper());
+		units.put("3", new Tank());
+		units.put("4", new TankDestroyer());
+		units.put("5", new ChemicalTroops());
+	}
+	
+	public static CountryState jsonToCountryState(String json, ObjectMapper om) throws JsonParseException, JsonMappingException, IOException {
+		if (json == null) {
+			CountryState cs = new CountryState();
+			cs.money = 0;
+			cs.arms = new HashMap<String, Integer>();
+			cs.econs = new HashMap<String, Integer>();
+			return cs;
+		}
+		return om.readValue(json, CountryState.class);
 	}
 
 	public static void setAttack(Game game, boolean attacked, int player) {

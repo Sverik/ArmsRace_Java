@@ -13,6 +13,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.googlecode.objectify.Key;
+import com.googlecode.objectify.Ref;
 import com.googlecode.objectify.Work;
 import com.po.armsrace.json.GameJson;
 import com.po.armsrace.store.OS;
@@ -88,9 +89,14 @@ public class GameResource extends ServerResource {
 							// untie users from the game
 							User p1 = game.player1.get();
 							User p2 = game.player2.get();
-							p1.activeGame = null;
-							p2.activeGame = null;
-							OS.ofy().save().entities(p1, p2);
+							if (p1.activeGame != null && p1.activeGame.compareTo(Ref.create(game)) == 0) {
+								p1.activeGame = null;
+								OS.ofy().save().entities(p1);
+							}
+							if (p2.activeGame != null && p2.activeGame.compareTo(Ref.create(game)) == 0) {
+								p2.activeGame = null;
+								OS.ofy().save().entities(p2);
+							}
 						}
 					} catch (JsonProcessingException e) {
 						setStatus(Status.CLIENT_ERROR_BAD_REQUEST);

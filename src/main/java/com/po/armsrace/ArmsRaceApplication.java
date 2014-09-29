@@ -18,7 +18,7 @@ public class ArmsRaceApplication extends Application {
 		// Defines only one route
 		router.attachDefault(ArmsResource.class);
 		router.attach("/arms/{armId}", ArmsResource.class);
-		router.attach("/battle/{battleId}", BattleResource.class);
+		router.attach("/battle/{gameId}", BattleResource.class);
 		router.attach("/register/{username}", RegisterResource.class);
 		router.attach("/player/", PlayerResource.class);
 		router.attach("/queue/", QueueResource.class);
