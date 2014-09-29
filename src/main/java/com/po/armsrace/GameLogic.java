@@ -8,7 +8,10 @@ import com.po.armsrace.store.entities.Game;
 
 public class GameLogic {
 	public static final long DEFENDER_BUFFER_MS = 20000;
-	
+	public static final long START_DELAY_MS = 5000;
+//	public static final long GAME_DURATION_MS = 4*60*1000;
+	public static final long GAME_DURATION_MS = 10*1000;
+
 	static class CountryState {
 		public int money;
 		public Map<String, Integer> arms;
@@ -37,31 +40,36 @@ public class GameLogic {
 	}
 
 	/**
-	 * 
+	 *
 	 * @param game
 	 * @param state
 	 * @param player
 	 * @return true/false whether state was changed
-	 * @throws JsonProcessingException 
+	 * @throws JsonProcessingException
 	 */
-	public static boolean setState(Game game, GameResource.State state, int player, 
+	public static boolean setState(Game game, GameResource.State state, int player,
 			ObjectMapper om) throws JsonProcessingException {
 		if (player != 1 && player != 2) {
 			throw new RuntimeException("Can't change game state when player is not in the game.");
 		}
 		if ( ! GameLogic.canChangeState(game, player)) {
+			if (game.endTime < System.currentTimeMillis()) {
+				// mäng läbi!
+				game.finished = true;
+				game.winner = 0;
+			}
 			return false;
 		}
 		setPeace(game, state.peaceOffer, player);
 		setAttack(game, state.attacked, player);
-		
+
 		CountryState cs = new CountryState();
 		cs.arms  = state.arms;
 		cs.econs = state.econs;
 		cs.money = state.money;
 		String csJson = om.writeValueAsString(cs);
 		setCountryState(game, csJson, player);
-		
+
 		return true;
 	}
 
@@ -87,6 +95,13 @@ public class GameLogic {
 			return false;
 		}
 		return true;
+	}
+
+	public static Game getNewGame() {
+		Game game = new Game();
+		game.startTime = System.currentTimeMillis() + START_DELAY_MS;
+		game.endTime   = game.startTime + GAME_DURATION_MS;
+		return game;
 	}
 
 }

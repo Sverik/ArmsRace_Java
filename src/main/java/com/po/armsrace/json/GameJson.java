@@ -3,21 +3,22 @@ package com.po.armsrace.json;
 
 public class GameJson {
 	public long id;
-	
+
 	public int yourNumber;
-	
+
 	public String player1;
 	public String player2;
-	
+
 	public long startTime;
 	public long endTime;
-	
+	public long currentTime;
+
 	public long attackTime;
 	public int attacker;
-	
+
 	public boolean peaceOffer1;
 	public boolean peaceOffer2;
-	
+
 	public String state1;
 	public String state2;
 

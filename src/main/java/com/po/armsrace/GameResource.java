@@ -84,12 +84,17 @@ public class GameResource extends ServerResource {
 					}
 					try {
 						GameLogic.setState(game, s, game.whichPlayer(u), om);
+						if (game.finished) {
+							// untie users from the game
+							game.player1.get().activeGame = null;
+							game.player2.get().activeGame = null;
+						}
 					} catch (JsonProcessingException e) {
 						setStatus(Status.CLIENT_ERROR_BAD_REQUEST);
 						e.printStackTrace();
 						return null;
 					}
-					OS.ofy().save().entity(game).now();
+					OS.ofy().save().entities(game, game.player1.get(), game.player2.get()).now();
 					return game;
 				}
 			});

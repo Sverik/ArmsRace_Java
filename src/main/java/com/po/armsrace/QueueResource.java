@@ -16,8 +16,6 @@ import com.po.armsrace.store.entities.User;
 
 public class QueueResource extends ServerResource {
 	public static final long VALID_QUEUE_MS = 10000;
-	public static final long START_DELAY_MS = 30000;
-	public static final long GAME_DURATION_MS = 4*60*1000;
 
 	@Post("json")
 	public GameJson queue(Object o) {
@@ -45,7 +43,6 @@ public class QueueResource extends ServerResource {
 					queue.id   = Queue.ID;
 
 					OS.ofy().save().entity(queue);
-					System.out.println("DEBUGXYZ 1 new queue");
 					return null;
 				}
 
@@ -53,7 +50,6 @@ public class QueueResource extends ServerResource {
 					// same user, updating time
 					q.updatedTime = System.currentTimeMillis();
 					OS.ofy().save().entity(q);
-					System.out.println("DEBUGXYZ 2 same user");
 					return null;
 				} else {
 					if (System.currentTimeMillis() - q.updatedTime > VALID_QUEUE_MS) {
@@ -61,17 +57,15 @@ public class QueueResource extends ServerResource {
 						q.updatedTime = System.currentTimeMillis();
 						q.user = Ref.create(user);
 						OS.ofy().save().entity(q);
-						System.out.println("DEBUGXYZ 3 queue too old");
 						return null;
 					} else {
 						// found up-to-date match, starting game
-						Game game = new Game();
-						game.startTime = System.currentTimeMillis() + START_DELAY_MS;
-						game.endTime   = game.startTime + GAME_DURATION_MS;
+						Game game = GameLogic.getNewGame();
 						game.player1   = q.user;
 						game.player2   = Ref.create(user);
 
 						OS.ofy().save().entity(game).now();
+
 
 						// adding game to users
 						User p1 = q.user.get();
@@ -82,29 +76,11 @@ public class QueueResource extends ServerResource {
 						// removing queue
 						OS.ofy().delete().entity(q);
 
-						System.out.println("DEBUGXYZ 4 match found");
 						return game.getJson(user);
 					}
 				}
 			}
 		});
-		// Testimiseks:
-		if (gj == null && false) {
-			GameJson g = new GameJson();
-			g.id = 100L;
-			g.yourNumber = 1;
-			g.player1 = user.username;
-			g.player2 = "See teine"; // Ref.create(OS.ofy().load().key( Key.create(User.class, "eh42o9oes230q6ivssrglq72pg") ).now());
-			g.startTime = System.currentTimeMillis();
-			g.endTime = g.startTime + 5 * 60 * 1000;
-			g.attackTime = 0;
-			g.attacker = 0;
-			g.peaceOffer1 = false;
-			g.peaceOffer2 = false;
-			g.winner = 0;
-			g.finished = false;
-			gj = g;
-		}
 		return gj;
 	}
 
