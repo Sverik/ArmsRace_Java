@@ -25,7 +25,7 @@ public class QueueResource extends ServerResource {
 			return null;
 		}
 
-		if (user.activeGame != null) {
+		if (user.activeGame != null && ! user.activeGame.get().finished) {
 			return user.activeGame.get().getJson(user);
 		}
 
