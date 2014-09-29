@@ -86,9 +86,11 @@ public class GameResource extends ServerResource {
 						GameLogic.setState(game, s, game.whichPlayer(u), om);
 						if (game.finished) {
 							// untie users from the game
-							game.player1.get().activeGame = null;
-							game.player2.get().activeGame = null;
-							OS.ofy().save().entities(game.player1.get(), game.player2.get());
+							User p1 = game.player1.get();
+							User p2 = game.player2.get();
+							p1.activeGame = null;
+							p2.activeGame = null;
+							OS.ofy().save().entities(p1, p2);
 						}
 					} catch (JsonProcessingException e) {
 						setStatus(Status.CLIENT_ERROR_BAD_REQUEST);
