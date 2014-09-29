@@ -8,9 +8,8 @@ import com.po.armsrace.store.entities.Game;
 
 public class GameLogic {
 	public static final long DEFENDER_BUFFER_MS = 20000;
-	public static final long START_DELAY_MS = 5000;
-//	public static final long GAME_DURATION_MS = 4*60*1000;
-	public static final long GAME_DURATION_MS = 10*1000;
+	public static final long START_DELAY_MS = 10000;
+	public static final long GAME_DURATION_MS = 4*60*1000;
 
 	static class CountryState {
 		public int money;
@@ -63,17 +62,17 @@ public class GameLogic {
 		setPeace(game, state.peaceOffer, player);
 		setAttack(game, state.attacked, player);
 
-		CountryState cs = new CountryState();
-		cs.arms  = state.arms;
-		cs.econs = state.econs;
-		cs.money = state.money;
-		String csJson = om.writeValueAsString(cs);
-		setCountryState(game, csJson, player);
+		setCountryState(game, state, player, om);
 
 		return true;
 	}
 
-	private static void setCountryState(Game game, String countryState, int player) {
+	private static void setCountryState(Game game, GameResource.State state, int player, ObjectMapper om) throws JsonProcessingException {
+		CountryState cs = new CountryState();
+		cs.arms  = state.arms;
+		cs.econs = state.econs;
+		cs.money = state.money;
+		String countryState = om.writeValueAsString(cs);
 		if (player == 1) {
 			game.state1 = countryState;
 		} else {
