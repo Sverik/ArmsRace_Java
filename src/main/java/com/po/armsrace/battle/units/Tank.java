@@ -2,7 +2,7 @@ package com.po.armsrace.battle.units;
 
 public class Tank extends UnitType {
 	public Tank() {
-		this.type = "tank";
+		this.name = "tank";
 		cost = 10000;
 
 		this.maxHealth  = 3000;

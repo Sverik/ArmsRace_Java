@@ -3,7 +3,7 @@ package com.po.armsrace.battle.units;
 public class Sniper extends UnitType {
 
 	public Sniper() {
-		this.type = "sniper";
+		this.name = "sniper";
 		cost = 450;
 
 		this.maxHealth  = 400;

@@ -2,7 +2,7 @@ package com.po.armsrace.battle.units;
 
 public class Marine extends UnitType {
 	public Marine() {
-		this.type = "marine";
+		this.name = "marine";
 		cost = 100;
 
 		this.maxHealth  = 400;

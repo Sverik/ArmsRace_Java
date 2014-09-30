@@ -1,7 +1,7 @@
 package com.po.armsrace.battle.units;
 
 public class UnitType {
-	public String type;
+	public String name;
 	public int cost;
 
 	/** initial health */
