@@ -2,7 +2,8 @@ package com.po.armsrace.battle.units;
 
 public class UnitType {
 	public String type;
-	
+	public int cost;
+
 	/** initial health */
 	public int maxHealth;
 	/** damage per second (per unit), total damage is dps*live.units */

@@ -1,10 +1,11 @@
 package com.po.armsrace.battle.units;
 
 public class Sniper extends UnitType {
-	
+
 	public Sniper() {
 		this.type = "sniper";
-		
+		cost = 450;
+
 		this.maxHealth  = 400;
 		this.dps        = 1000;
 		this.armoredDPS = 500;

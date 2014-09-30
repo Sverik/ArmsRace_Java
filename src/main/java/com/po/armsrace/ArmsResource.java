@@ -1,13 +1,16 @@
 package com.po.armsrace;
 
+import java.util.Map;
+
 import org.restlet.resource.Get;
 import org.restlet.resource.ServerResource;
 
+import com.po.armsrace.battle.units.UnitType;
+
 public class ArmsResource extends ServerResource {
 
-	@Get
-	public String represent(Object o) {
-		o = getAttribute("armId");
-		return "Arms Racer REST service is here! [" + (o != null ? o.getClass().getCanonicalName() + ":" + o.toString() : null) + "]";
+	@Get("json")
+	public Map<String, UnitType> arms() {
+		return GameLogic.units;
 	}
 }
