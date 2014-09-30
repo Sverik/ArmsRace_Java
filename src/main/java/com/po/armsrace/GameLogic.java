@@ -26,7 +26,7 @@ public class GameLogic {
 		public Map<String, Integer> arms;
 		public Map<String, Integer> econs;
 	}
-	
+
 	public static final HashMap<String, UnitType> units;
 	static {
 		units = new HashMap<String, UnitType>();
@@ -36,7 +36,7 @@ public class GameLogic {
 		units.put("4", new TankDestroyer());
 		units.put("5", new ChemicalTroops());
 	}
-	
+
 	public static CountryState jsonToCountryState(String json, ObjectMapper om) throws JsonParseException, JsonMappingException, IOException {
 		if (json == null) {
 			CountryState cs = new CountryState();
@@ -54,7 +54,8 @@ public class GameLogic {
 		}
 		if (attacked) {
 			game.attacker = player;
-			game.attackTime = System.currentTimeMillis() + DEFENDER_BUFFER_MS;
+			game.attackTime = Math.min( System.currentTimeMillis() + DEFENDER_BUFFER_MS , game.endTime );
+			game.endTime = game.attackTime;
 		}
 	}
 
