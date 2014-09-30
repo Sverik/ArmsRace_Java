@@ -24,9 +24,9 @@ import com.po.armsrace.store.entities.GameLog;
 import com.po.armsrace.store.entities.User;
 
 public class BattleResource extends ServerResource {
-	
+
 	ObjectMapper om = new ObjectMapper();
-	
+
 	@Get("json")
 	public String battle(Object o) {
 		final User u = PlayerResource.getUser(this);
@@ -34,7 +34,7 @@ public class BattleResource extends ServerResource {
 			setStatus(Status.CLIENT_ERROR_UNAUTHORIZED);
 			return null;
 		}
-		
+
 		// checking game exists & user is in game
 		String gameIdStr = getAttribute("gameId");
 		if (gameIdStr == null) {
@@ -68,7 +68,7 @@ public class BattleResource extends ServerResource {
 						OS.ofy().save().entity(p2);
 					}
 				}
-				
+
 				GameLog gameLog = OS.ofy().load()
 						.key(Key.create(GameLog.class, game.id)).now();
 				if (gameLog == null) {
@@ -77,20 +77,20 @@ public class BattleResource extends ServerResource {
 					try {
 						CountryState cs1 = GameLogic.jsonToCountryState(game.state1, om);
 						CountryState cs2 = GameLogic.jsonToCountryState(game.state2, om);
-						
+
 						Map map = new Map();
 						int i = 1;
 						for (Entry<String, Integer> unit : cs1.arms.entrySet()) {
 							UnitType ut = GameLogic.units.get(unit.getKey());
 							if (ut == null) continue;
-							Unit u = new Unit(ut, unit.getValue(), new int[]{2, i*2} );
+							Unit u = new Unit(ut, unit.getValue(), new int[]{2, i++} );
 							map.addUnit(0, u);
 						}
 						i = 1;
 						for (Entry<String, Integer> unit : cs2.arms.entrySet()) {
 							UnitType ut = GameLogic.units.get(unit.getKey());
 							if (ut == null) continue;
-							Unit u = new Unit(ut, unit.getValue(), new int[]{17, i*2} );
+							Unit u = new Unit(ut, unit.getValue(), new int[]{17, i++} );
 							map.addUnit(1, u);
 						}
 						Battle b = map.doBattle();
@@ -116,19 +116,19 @@ public class BattleResource extends ServerResource {
 						return null;
 					}
 				}
-				
+
 				if (gameChanged) {
 					OS.ofy().save().entity(game);
 				}
 				return gameLog;
 			}
 		});
-		
+
 		/*
 		Map map = new Map();
 		//map.addUnit(0, new Unit(new Tank(), 10, new int[]{2, 8}) );
 		map.addUnit(0, new Unit(new Marine(), 50, new int[]{4, 5}) );
-		
+
 		map.addUnit(1, new Unit(new Sniper(), 10, new int[]{17, 2}) );
 		//map.addUnit(1, new Unit(new TankDestroyer(), 10, new int[]{17, 3}) );
 		//map.addUnit(1, new Unit(new ChemicalTroops(), 10, new int[]{17, 3}) );
