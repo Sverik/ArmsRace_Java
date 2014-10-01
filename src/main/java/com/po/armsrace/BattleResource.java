@@ -19,8 +19,8 @@ import com.po.armsrace.battle.Map;
 import com.po.armsrace.battle.units.Unit;
 import com.po.armsrace.battle.units.UnitType;
 import com.po.armsrace.store.OS;
+import com.po.armsrace.store.entities.BattleLog;
 import com.po.armsrace.store.entities.Game;
-import com.po.armsrace.store.entities.GameLog;
 import com.po.armsrace.store.entities.User;
 
 public class BattleResource extends ServerResource {
@@ -43,9 +43,9 @@ public class BattleResource extends ServerResource {
 		}
 		final long gameId = Long.parseLong(gameIdStr);
 
-		GameLog gl = OS.ofy().transact(new Work<GameLog>() {
+		BattleLog bl = OS.ofy().transact(new Work<BattleLog>() {
 			@Override
-			public GameLog run() {
+			public BattleLog run() {
 				Game game = OS.ofy().load()
 						.key(Key.create(Game.class, gameId)).now();
 				if (game.endTime > System.currentTimeMillis()) {
@@ -69,14 +69,14 @@ public class BattleResource extends ServerResource {
 					}
 				}
 
-				GameLog gameLog = OS.ofy().load()
-						.key(Key.create(GameLog.class, game.id)).now();
-				if (gameLog == null) {
+				BattleLog battleLog = OS.ofy().load()
+						.key(Key.create(BattleLog.class, game.id)).now();
+				if (battleLog == null) {
 					// battle
 					gameChanged = true;
 					try {
-						CountryState cs1 = GameLogic.jsonToCountryState(game.state1, om);
-						CountryState cs2 = GameLogic.jsonToCountryState(game.state2, om);
+						CountryState cs1 = GameLogic.jsonToCountryState(game.current.get().state1, om);
+						CountryState cs2 = GameLogic.jsonToCountryState(game.current.get().state2, om);
 
 						Map map = new Map();
 						int i = 1;
@@ -102,11 +102,11 @@ public class BattleResource extends ServerResource {
 							game.winner = b.winner + 1;
 						}
 						String battleString = om.writeValueAsString(b);
-						gameLog = new GameLog();
-						gameLog.id = game.id;
-						gameLog.log = battleString;
+						battleLog = new BattleLog();
+						battleLog.id = game.id;
+						battleLog.log = battleString;
 
-						OS.ofy().save().entity(gameLog);
+						OS.ofy().save().entity(battleLog);
 
 					} catch (JsonParseException | JsonMappingException e) {
 						e.printStackTrace();
@@ -120,7 +120,7 @@ public class BattleResource extends ServerResource {
 				if (gameChanged) {
 					OS.ofy().save().entity(game);
 				}
-				return gameLog;
+				return battleLog;
 			}
 		});
 
@@ -135,8 +135,8 @@ public class BattleResource extends ServerResource {
 		//map.addUnit(1, new Unit(new Tank(), 20, new int[]{17, 2}) );
 		return map.doBattle();
 		*/
-		if (gl != null) {
-			return gl.log;
+		if (bl != null) {
+			return bl.log;
 		}
 		return null;
 	}

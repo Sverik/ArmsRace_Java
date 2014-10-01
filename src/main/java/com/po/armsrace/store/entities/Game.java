@@ -12,6 +12,8 @@ import com.po.armsrace.json.GameJson;
 public class Game {
 	public @Id Long id;
 
+	public Ref<GameLog> current;
+
 	public Ref<User> player1;
 	public Ref<User> player2;
 
@@ -22,17 +24,17 @@ public class Game {
 	// 0 == no attack, 1 == p1 attacks, 2 == p2 attacks
 	public int attacker;
 
-	public boolean peaceOffer1;
-	public boolean peaceOffer2;
-
-	public String state1;
-	public String state2;
-
 	// 0 == not finished, 1 == p1 won, 2 == p2 won, 3 == draw
 	public int winner;
 	public boolean finished;
 
+	public Ref<Game> replayGame;
+	/** Kumma mängija mäng replayGame'ist uuesti mängitakse. */
+	public int replayPlayer;
+
 	public GameJson getJson(User user) {
+		GameLog gl = current.get();
+
 		GameJson gj = new GameJson();
 
 		gj.yourNumber = whichPlayer(user);
@@ -48,11 +50,11 @@ public class Game {
 		gj.attackTime = attackTime;
 		gj.attacker = attacker;
 
-		gj.peaceOffer1 = peaceOffer1;
-		gj.peaceOffer2 = peaceOffer2;
+		gj.peaceOffer1 = gl.peaceOffer1;
+		gj.peaceOffer2 = gl.peaceOffer2;
 
-		gj.state1 = state1;
-		gj.state2 = state2;
+		gj.state1 = gl.state1;
+		gj.state2 = gl.state2;
 
 		gj.winner = winner;
 		gj.finished = finished;

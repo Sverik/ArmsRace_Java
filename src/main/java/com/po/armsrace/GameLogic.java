@@ -15,6 +15,7 @@ import com.po.armsrace.battle.units.Tank;
 import com.po.armsrace.battle.units.TankDestroyer;
 import com.po.armsrace.battle.units.UnitType;
 import com.po.armsrace.store.entities.Game;
+import com.po.armsrace.store.entities.GameLog;
 
 public class GameLogic {
 	public static final long DEFENDER_BUFFER_MS = 20000;
@@ -60,12 +61,13 @@ public class GameLogic {
 	}
 
 	public static void setPeace(Game game, boolean peace, int player) {
-		boolean canChangePeace = ! game.peaceOffer1 || ! game.peaceOffer2;
+		GameLog gl = game.current.get();
+		boolean canChangePeace = ! gl.peaceOffer1 || ! gl.peaceOffer2;
 		if (canChangePeace) {
 			if (player == 1) {
-				game.peaceOffer1 = peace;
+				gl.peaceOffer1 = peace;
 			} else {
-				game.peaceOffer2 = peace;
+				gl.peaceOffer2 = peace;
 			}
 		}
 	}
@@ -105,10 +107,11 @@ public class GameLogic {
 		cs.econs = state.econs;
 		cs.money = state.money;
 		String countryState = om.writeValueAsString(cs);
+		GameLog gl = game.current.get();
 		if (player == 1) {
-			game.state1 = countryState;
+			gl.state1 = countryState;
 		} else {
-			game.state2 = countryState;
+			gl.state2 = countryState;
 		}
 	}
 

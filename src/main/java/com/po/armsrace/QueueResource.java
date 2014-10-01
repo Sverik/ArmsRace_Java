@@ -10,6 +10,7 @@ import com.googlecode.objectify.Work;
 import com.po.armsrace.json.GameJson;
 import com.po.armsrace.store.OS;
 import com.po.armsrace.store.entities.Game;
+import com.po.armsrace.store.entities.GameLog;
 import com.po.armsrace.store.entities.Queue;
 import com.po.armsrace.store.entities.User;
 
@@ -66,6 +67,11 @@ public class QueueResource extends ServerResource {
 
 						OS.ofy().save().entity(game).now();
 
+						GameLog gl = new GameLog();
+						gl.game = Ref.create(game);
+						OS.ofy().save().entity(gl).now();
+						game.current = Ref.create(gl);
+						OS.ofy().save().entity(game).now();
 
 						// adding game to users
 						User p1 = q.user.get();

@@ -18,6 +18,7 @@ import com.googlecode.objectify.Work;
 import com.po.armsrace.json.GameJson;
 import com.po.armsrace.store.OS;
 import com.po.armsrace.store.entities.Game;
+import com.po.armsrace.store.entities.GameLog;
 import com.po.armsrace.store.entities.User;
 
 public class GameResource extends ServerResource {
@@ -83,6 +84,10 @@ public class GameResource extends ServerResource {
 						setStatus(Status.CLIENT_ERROR_UNAUTHORIZED);
 						return null;
 					}
+					GameLog gl = game.current.get().clone();
+					OS.ofy().save().entities(gl).now();
+					game.current = Ref.create(gl);
+					gl.time = System.currentTimeMillis();
 					try {
 						GameLogic.setState(game, s, game.whichPlayer(u), om);
 						if (game.finished) {
@@ -103,7 +108,7 @@ public class GameResource extends ServerResource {
 						e.printStackTrace();
 						return null;
 					}
-					OS.ofy().save().entities(game).now();
+					OS.ofy().save().entities(game, gl).now();
 					return game;
 				}
 			});
