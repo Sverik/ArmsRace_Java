@@ -4,6 +4,8 @@ import com.googlecode.objectify.Ref;
 import com.googlecode.objectify.annotation.Cache;
 import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Id;
+import com.googlecode.objectify.annotation.Index;
+import com.googlecode.objectify.annotation.Parent;
 
 @Entity
 @Cache
@@ -11,7 +13,10 @@ public class GameLog {
 	@Id
 	public Long id;
 
+	@Index
+	@Parent
 	public Ref<Game> game;
+	@Index
 	public long time;
 
 	public boolean peaceOffer1;

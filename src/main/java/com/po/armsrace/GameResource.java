@@ -24,11 +24,6 @@ import com.po.armsrace.store.entities.User;
 public class GameResource extends ServerResource {
 
 	public static class State {
-		/*
-		 * Katsetus, kliendilt saadetud Json
-		 * {"money":229,"arms":{"1":2},"econs":
-		 * {"1":5,"2":1},"peaceOffer":false,"attacked":false}
-		 */
 		public int money;
 		public Map<String, Integer> arms;
 		public Map<String, Integer> econs;
@@ -89,6 +84,9 @@ public class GameResource extends ServerResource {
 					game.current = Ref.create(gl);
 					gl.time = System.currentTimeMillis();
 					try {
+						if (game.replayGame != null) {
+							replayOpponent(game, om);
+						}
 						GameLogic.setState(game, s, game.whichPlayer(u), om);
 						if (game.finished) {
 							// untie users from the game
@@ -104,6 +102,10 @@ public class GameResource extends ServerResource {
 							}
 						}
 					} catch (JsonProcessingException e) {
+						setStatus(Status.CLIENT_ERROR_BAD_REQUEST);
+						e.printStackTrace();
+						return null;
+					} catch (IOException e) {
 						setStatus(Status.CLIENT_ERROR_BAD_REQUEST);
 						e.printStackTrace();
 						return null;
@@ -127,6 +129,23 @@ public class GameResource extends ServerResource {
 			return null;
 		}
 		return g.getJson(u);
+	}
+
+	private void replayOpponent(Game game, ObjectMapper om) throws JsonParseException, JsonMappingException, IOException {
+		Game replayGame = game.replayGame.get();
+		long timeInReplayGame = replayGame.startTime + (game.current.get().time - game.startTime);
+		GameLog gl = OS.ofy().load().type( GameLog.class ).ancestor(game.replayGame).filter("time <=", timeInReplayGame).order("-time").first().now();
+		if (gl == null) {
+			return;
+		}
+		// Replay players are always player1
+		if (gl.state1 != null && ! gl.state1.trim().isEmpty()) {
+			State opponentState = om.readValue(gl.state1, State.class);
+			if (replayGame.attacker == 1 && replayGame.attackTime >= timeInReplayGame) {
+				opponentState.attacked = true;
+			}
+			GameLogic.setState(game, opponentState, 1, om);
+		}
 	}
 
 }

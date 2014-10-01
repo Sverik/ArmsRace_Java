@@ -5,6 +5,8 @@ import com.googlecode.objectify.Ref;
 import com.googlecode.objectify.annotation.Cache;
 import com.googlecode.objectify.annotation.Entity;
 import com.googlecode.objectify.annotation.Id;
+import com.googlecode.objectify.annotation.Index;
+import com.googlecode.objectify.condition.IfTrue;
 import com.po.armsrace.json.GameJson;
 
 @Entity
@@ -26,6 +28,7 @@ public class Game {
 
 	// 0 == not finished, 1 == p1 won, 2 == p2 won, 3 == draw
 	public int winner;
+	@Index(IfTrue.class)
 	public boolean finished;
 
 	public Ref<Game> replayGame;
@@ -68,7 +71,8 @@ public class Game {
 	 *         -1 if neither
 	 */
 	public int whichPlayer(User user) {
-		if (Key.create(user).compareTo(player1.getKey()) == 0) {
+		// players cannot be in first position in games that are replayed
+		if (replayGame == null && Key.create(user).compareTo(player1.getKey()) == 0) {
 			return 1;
 		}
 		if (Key.create(user).compareTo(player2.getKey()) == 0) {
